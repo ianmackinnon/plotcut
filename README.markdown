@@ -2,6 +2,13 @@
 
 Optimises SVG vector files for sending to a cutting plotter.
 
+## Requirements
+
+-   [Python](http://www.python.org/)
+-   [NumPy](http://numpy.scipy.org/)
+-   [Mako](http://www.makotemplates.org/)
+-   [BeautifulSoup](http://www.crummy.com/software/BeautifulSoup/)
+
 ## Usage
 
     plotcut.py in.svg > out.svg

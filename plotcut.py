@@ -13,7 +13,7 @@ from BeautifulSoup import BeautifulStoneSoup
 
 logging.basicConfig()
 log = logging.getLogger('plotcutsvg')
-log.setLevel(logging.DEBUG)
+log.setLevel(logging.WARNING)
 
 def decode_transform(t):
     trans = re.compile('translate\(([0-9.e-]+),([0-9.e-]+)\)')
@@ -70,6 +70,8 @@ style="fill:none;stroke:#000000;stroke-width:0.03mm;" />
 
 
 def split_paths(d, transform, point):
+    minimum_distance = .1;
+
     instruction_options = {
         'C':6,
         'c':6,
@@ -90,6 +92,7 @@ def split_paths(d, transform, point):
     params = []
     nparams = 0
     for part in parts:
+        part = part.strip()
         if not part:
             continue
         if re.match('[a-zA-Z]', part):
@@ -120,7 +123,7 @@ def split_paths(d, transform, point):
                 elif instruction == 'M':
                     instruction = 'L'
     assert nparams == 0
-                
+
     paths = [[], ]
     paths2 = [[], ]
     sub_point = None
@@ -180,13 +183,11 @@ def split_paths(d, transform, point):
         else:
             raise Exception, command
 
-        # last point components too high
-
-        if command == 'M' or distance(point, last_point) > 1:
+        # avoid duplicate points
+        if command == 'M' or distance(point, last_point) > minimum_distance:
             paths[-1].append([command, coords])
             last_point = point.copy()
-        
-        
+            
     paths = [deque(path) for path in paths if len(path) > 1]
     return paths
 
@@ -212,7 +213,7 @@ def svg_extract_paths(soup, transform=None, point=None):
         for child in soup.contents:
             for path in svg_extract_paths(child, transform.copy(), point.copy()):
                 paths.append(path)
-
+                
     return paths
 
 def inxpoint(inx):

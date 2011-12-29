@@ -301,8 +301,8 @@ if __name__ == '__main__':
     elif not options.verbosity:
         log.setLevel(logging.ERROR)
 
-    if not len(args):
+    if len(args) != 1:
         parser.print_usage()
         sys.exit(1)
 
-    print svg_file_to_plotcutsvg(arg)
+    print svg_file_to_plotcutsvg(args[0])

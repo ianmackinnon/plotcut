@@ -7,13 +7,17 @@ import codecs
 import logging
 import numpy
 
+from optparse import OptionParser
+
 from collections import deque
 from mako.template import Template
 from BeautifulSoup import BeautifulStoneSoup
 
-logging.basicConfig()
+
+
 log = logging.getLogger('plotcutsvg')
-log.setLevel(logging.WARNING)
+
+
 
 def decode_transform(t):
     trans = re.compile('translate\(([0-9.e-]+),([0-9.e-]+)\)')
@@ -269,12 +273,36 @@ def svg_text_to_plotcutsvg(svg_text):
     return plotcut_svg
 
 
+
 def svg_file_to_plotcutsvg(filename):
     svg_text = codecs.open(filename, 'r', 'utf-8').read()
     return svg_text_to_plotcutsvg(svg_text)
 
 
+
 if __name__ == '__main__':
-    assert len(sys.argv) > 1, "Usage: %s [FILE]..."
-    for arg in sys.argv[1:]:
-        print svg_file_to_plotcutsvg(arg)
+    log.addHandler(logging.StreamHandler())
+    log.setLevel(logging.WARNING)
+
+    usage = """%prog FILE"""
+
+    parser = OptionParser(usage=usage)
+    parser.add_option("-v", "--verbose", action="count", dest="verbosity",
+                      help="Print verbose information for debugging.", default=1)
+    parser.add_option("-q", "--quiet", action="store_const", const=0, dest="verbosity",
+                      help="Suppress warnings.", default=1)
+    
+    (options, args) = parser.parse_args()
+    
+    if options.verbosity > 2:
+        log.setLevel(logging.DEBUG)
+    elif options.verbosity == 2:
+        log.setLevel(logging.INFO)
+    elif not options.verbosity:
+        log.setLevel(logging.ERROR)
+
+    if not len(args):
+        parser.print_usage()
+        sys.exit(1)
+
+    print svg_file_to_plotcutsvg(arg)
